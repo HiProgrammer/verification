@@ -24,6 +24,14 @@ import java.util.Map;
 public class VerificationUtil {
 
     /**
+     * 生成正方性拼图边长（像素）
+     */
+    public static final int SQUARE_SIDE_LENGTH = 50;
+    /**
+     * 拼图距离图像的边距（像素）
+     */
+    public static final int BOARD = 5;
+    /**
      * 原始图片长度（像素）
      */
     private static final int TARGET_LENGTH = 300;
@@ -32,17 +40,9 @@ public class VerificationUtil {
      */
     private static final int TARGET_WIDTH = 150;
     /**
-     * 生成正方性拼图边长（像素）
-     */
-    public static final int SQUARE_SIDE_LENGTH = 50;
-    /**
      * 拼图块圆形区域半径（像素）
      */
     private static final int CIRCLE_R = 10;
-    /**
-     * 拼图距离图像的边距（像素）
-     */
-    public static final int BOARD = 5;
 
     /**
      * 高斯图片模糊处理并加工
@@ -101,9 +101,10 @@ public class VerificationUtil {
      * @param args
      */
     public static void main( String[] args ) {
-        URL background = VerificationUtil.class.getClassLoader().getResource("images/verification/background1.png");
+        URL backgroundUrl = VerificationUtil.class.getClassLoader().getResource("images/verification/background1.png");
+        URL pathUrl = VerificationUtil.class.getClassLoader().getResource("");
         try {
-            BufferedImage originalImage = ImageIO.read(new File(background.toURI()));
+            BufferedImage originalImage = ImageIO.read(new File(backgroundUrl.toURI()));
             BufferedImage targetImage = new BufferedImage(
                     (VerificationUtil.SQUARE_SIDE_LENGTH + VerificationUtil.CIRCLE_R * 2),
                     (VerificationUtil.TARGET_WIDTH),
@@ -130,7 +131,7 @@ public class VerificationUtil {
             File temp = File.createTempFile("temp", ".png");
             ImageIO.write(targetImageBlur, "png", temp);
             FileInputStream input = new FileInputStream(temp);
-            OutputStream os = new FileOutputStream(new File("F:\\targetImage.png"));
+            OutputStream os = new FileOutputStream(new File(pathUrl.getPath() + "images/verification/targetImage.png"));
             byte[] b = new byte[1024];
             while (input.read(b) != -1) {
                 os.write(b);
@@ -141,7 +142,7 @@ public class VerificationUtil {
             temp = File.createTempFile("temp", ".jpg");
             ImageIO.write(originalImageBlur, "jpg", temp);
             input = new FileInputStream(temp);
-            OutputStream os2 = new FileOutputStream(new File("F:\\originalImage.jpg"));
+            OutputStream os2 = new FileOutputStream(new File(pathUrl.getPath() + "images/verification/originalImage.png"));
             byte[] b2 = new byte[1024];
             while (input.read(b2) != -1) {
                 os2.write(b2);
@@ -271,7 +272,7 @@ public class VerificationUtil {
             VerificationUtil.simpleBlur(originalImage, originalImageBlur);
             VerificationUtil.simpleBlur(targetImage, targetImageBlur);
             //背景改用jpg格式，缩小图片体积
-            map.put("original", "data:image/jpg;base64," + VerificationUtil.imageToBase64(originalImageBlur,"jpg"));
+            map.put("original", "data:image/jpg;base64," + VerificationUtil.imageToBase64(originalImageBlur, "jpg"));
             //拼图使用jpg格式，保留透明度
             map.put("target", "data:image/png;base64," + VerificationUtil.imageToBase64(targetImageBlur, "png"));
             //将拼图左下角位置记录返回，以便与前端比对
@@ -296,7 +297,7 @@ public class VerificationUtil {
      * @return
      * @throws Exception
      */
-    private static String imageToBase64( BufferedImage image ,String imageType) throws Exception {
+    private static String imageToBase64( BufferedImage image, String imageType ) throws Exception {
         byte[] imagedata = null;
         ByteArrayOutputStream bao = new ByteArrayOutputStream();
         ImageIO.write(image, imageType == null ? "png" : imageType, bao);
